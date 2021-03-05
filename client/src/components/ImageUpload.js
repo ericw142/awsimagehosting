@@ -1,44 +1,43 @@
-import React from "react";
-const fs = require('fs');
-const AWS = require('aws-sdk');
-
-// Enter copied or downloaded access ID and secret key here
-const ID = '';
-const SECRET = '';
-
-// The name of the bucket that you have created
-const s3 = new AWS.S3({
-    accessKeyId: ID,
-    secretAccessKey: SECRET
-});
-
-function s3upload(file) {
-    // Read content from the file
-    const fileContent = fs.readFileSync(file);
-
-    // Setting up S3 upload parameters
-    const params = {
-        Bucket: ericw142bucket,
-        Key: 'cat.jpg', // File name you want to save as in S3
-        Body: fileContent
-    };
-
-    // Uploading files to the bucket
-    s3.upload(params, function(err, data) {
-        if (err) {
-            throw err;
-        }
-        console.log(`File uploaded successfully. ${data.Location}`);
-    });
-}
+import React, { useRef } from "react";
+import S3 from "react-aws-s3";
 
 function ImageUpload () {
+    const fileInput = useRef();
+
+    const handleClick = event => {
+        event.preventDefault();
+        
+        let file = fileInput.current.files[0];
+        let newFileName = fileInput.current.files[0].name;
+
+        const config = {
+            bucketName: process.env.REACT_APP_BUCKET_NAME,
+            region: process.env.REACT_APP_REGION,
+            accessKeyId: process.env.REACT_APP_ACCESS_ID,
+            secretAccessKey: process.env.REACT_APP_ACCESS_KEY
+        };
+
+        const ReactS3Client = new S3(config);
+        ReactS3Client.uploadFile(file, newFileName).then(data => {
+            console.log(data);
+            if (data.status === 204) {
+                console.log("success");
+            } else {
+                console.log("fail")
+            }
+        });
+    }
     return(
         <div>
-            <input type="file" id="fileUpload"></input>
-            <button onclick={s3upload}>Submit</button>
-            <br />
-            <progress max="100" value="0"></progress>
+            <form className="upload-steps" onSubmit={handleClick}>
+                <label>
+                    Upload file: 
+                    <input type="file" ref={fileInput}></input>
+                </label>
+                <br />
+                <button type="submit">Submit</button>
+            </form>
+           
             <hr />
         </div>
     )
