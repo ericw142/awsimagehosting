@@ -7,6 +7,8 @@ function App() {
     <div className="App container">
         <ImageDisplay />
         <hr />
+        <h4>Upload your own Image!</h4>
+        <br />
         <ImageUpload />
     </div>
   );
